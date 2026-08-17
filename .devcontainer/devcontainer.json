@@ -1,0 +1,32 @@
+{
+  "name": "Azure Functions (Node.js)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [
+    7071,
+    10000,
+    10001,
+    10002
+  ],
+  "otherPortsAttributes": {
+    "onAutoForward": "ignore"
+  },
+  "features": {
+    "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {
+      "version": "latest"
+	},
+	"ghcr.io/devcontainers/features/github-cli:1": {},
+	"ghcr.io/stu-bell/devcontainer-features/node:0": {},
+	"ghcr.io/rails/devcontainer/features/mysql-client:1": {},
+	"ghcr.io/devcontainer-config/features/dot-config:4": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-azurefunctions",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}
