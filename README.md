@@ -1,12 +1,11 @@
 ## Hải Yến và Anh Quân - WebNC
-1. Mở VS Code và mở workspace (thư mục dự án).
+1. Mở VS Code → mở thư mục dự án.
 2. Mở Command Palette (Ctrl+Shift+P).
-3. Gõ: `Dev Containers: Add Development Container Configuration Files` (hoặc `Remote-Containers: Add Development Container Configuration Files`).
-4. Chọn mẫu phù hợp (ví dụ: **Node.js,github,.....**). Chọn phiên bản Node bạn muốn sử dụng.
-5. VS Code sẽ tạo thư mục `.devcontainer/` chứa `devcontainer.json` và có thể kèm `Dockerfile` hoặc `docker-compose.yml` tuỳ lựa chọn.
-6. Sau khi cấu hình xong: mở Command Palette → `Dev Containers: Reopen in Container` (hoặc `Remote-Containers: Reopen Folder in Container`) để khởi động và mở workspace bên trong container.
-7 Mở terminal trong VS Code và chạy lệnh: npm init -y để tạo package.json
-8. Chạy lệnh npx create-react-app client để tạo ứng dụng React trong thư mục `client`.
+3. Gõ: Dev Containers: Add Development Container Configuration Files.
+4. Chọn mẫu (Node.js,mysql,github) và phiên bản Node mong muốn.
+5. Command Palette → chọn Dev Containers: Reopen in Container để mở dự án trong container.
+6. Mở terminal trong VS Code → chạy npm init -y để tạo package.json.
+7. Chạy npx create-react-app client để tạo ứng dụng React trong thư mục client.
 ```bash
 ---
 ## Docker — build và chạy bằng Docker Compose
