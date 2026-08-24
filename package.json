@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "server": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,5 +18,10 @@
   "bugs": {
     "url": "https://github.com/hayen2305/WebNC_HaiYen_AnhQuan/issues"
   },
-  "homepage": "https://github.com/hayen2305/WebNC_HaiYen_AnhQuan#readme"
+  "homepage": "https://github.com/hayen2305/WebNC_HaiYen_AnhQuan#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "validator": "^13.15.35"
+  }
 }
