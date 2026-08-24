@@ -1,10 +1,6 @@
-// Import thư viện Express
 const express = require('express');
 const app = express();
-
-// Middleware để đọc dữ liệu JSON từ body
 app.use(express.json());
-
 app.post('/api/post', 
     (req, res) => {  
         //parameters
@@ -28,7 +24,7 @@ app.post('/api/post',
     
     });
 });
-// Khởi động server
+
 app.listen(3000, () => {
   console.log('Server chạy tại http://localhost:3000');
 });
