@@ -119,7 +119,7 @@ Kết nối database được bảo mật bằng SSL.
 | Nodemailer  | Gửi email                   |
 | SendGrid    | Email service               |
 | Postman     | API Testing                 |
-| Docker      | Containerization (tùy chọn) |
+
 
 ---
 
@@ -754,29 +754,7 @@ Confirmation Email
 
 ---
 
-# 🐳 Docker
 
-Docker là tùy chọn.
-
-Build image:
-
-```bash
-docker build -t booking-system-api .
-```
-
-Run:
-
-```bash
-docker run -p 5000:5000 booking-system-api
-```
-
-API:
-
-```text
-http://localhost:5000
-```
-
----
 
 # 📂 Project Structure
 
