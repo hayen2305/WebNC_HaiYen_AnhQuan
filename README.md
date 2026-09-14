@@ -263,6 +263,7 @@ Index:
 giúp tối ưu việc tìm kiếm các appointment của một nhân viên trong khoảng thời gian cụ thể.
 
 UML DIAGRAM
+
 @startuml BookingSystem4TablesClassDiagram
 
 skinparam classAttributeIconSize 0
