@@ -262,6 +262,76 @@ Index:
 
 giúp tối ưu việc tìm kiếm các appointment của một nhân viên trong khoảng thời gian cụ thể.
 
+UML DIAGRAM
+@startuml BookingSystem4TablesClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam packageStyle rectangle
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+class Service {
+  + String id
+  + String name
+  + int durationMinutes
+  + Float price
+  + DateTime createdAt
+}
+
+class Staff {
+  + String id
+  + String name
+  + String email
+  + DateTime createdAt
+}
+
+class WorkingHour {
+  + String id
+  + String staffId
+  + int dayOfWeek
+  + String startTime
+  + String endTime
+}
+
+class Appointment {
+  + String id
+  + String userId
+  + String staffId
+  + String serviceId
+  + DateTime startAt
+  + DateTime endAt
+  + AppointmentStatus status
+  + DateTime createdAt
+}
+
+class BookingController {
+  + getAvailableSlots(staffId: String, serviceId: String, date: String): List
+  + createBooking(userId: String, staffId: String, serviceId: String, startAt: DateTime): Appointment
+}
+
+class MailService {
+  + sendBookingConfirmation(userEmail: String, bookingDetails: Object): void
+}
+
+' Relationships (Mối quan hệ 4 bảng)
+Staff "1" -- "0..*" WorkingHour : has >
+Staff "1" -- "0..*" Appointment : assigned_to <
+Service "1" -- "0..*" Appointment : booked_for <
+AppointmentStatus <-- Appointment : status
+
+' Business Logic Dependencies
+BookingController ..> Staff : queries
+BookingController ..> Service : queries
+BookingController ..> WorkingHour : checks
+BookingController ..> Appointment : creates/reads
+BookingController ..> MailService : calls
+
+@enduml
 ---
 
 # 🚀 Tính năng chính
