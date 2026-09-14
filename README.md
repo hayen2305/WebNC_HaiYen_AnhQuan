@@ -264,75 +264,71 @@ giúp tối ưu việc tìm kiếm các appointment của một nhân viên tron
 
 UML DIAGRAM
 
-@startuml BookingSystem4TablesClassDiagram
+classDiagram
+    direction TB
 
-skinparam classAttributeIconSize 0
-skinparam monochrome false
-skinparam packageStyle rectangle
+    class AppointmentStatus {
+        <<enumeration>>
+        PENDING
+        CONFIRMED
+        CANCELLED
+    }
 
-enum AppointmentStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-}
+    class Service {
+        +String id
+        +String name
+        +int durationMinutes
+        +Float price
+        +DateTime createdAt
+    }
 
-class Service {
-  + String id
-  + String name
-  + int durationMinutes
-  + Float price
-  + DateTime createdAt
-}
+    class Staff {
+        +String id
+        +String name
+        +String email
+        +DateTime createdAt
+    }
 
-class Staff {
-  + String id
-  + String name
-  + String email
-  + DateTime createdAt
-}
+    class WorkingHour {
+        +String id
+        +String staffId
+        +int dayOfWeek
+        +String startTime
+        +String endTime
+    }
 
-class WorkingHour {
-  + String id
-  + String staffId
-  + int dayOfWeek
-  + String startTime
-  + String endTime
-}
+    class Appointment {
+        +String id
+        +String userId
+        +String staffId
+        +String serviceId
+        +DateTime startAt
+        +DateTime endAt
+        +AppointmentStatus status
+        +DateTime createdAt
+    }
 
-class Appointment {
-  + String id
-  + String userId
-  + String staffId
-  + String serviceId
-  + DateTime startAt
-  + DateTime endAt
-  + AppointmentStatus status
-  + DateTime createdAt
-}
+    class BookingController {
+        +getAvailableSlots(staffId, serviceId, date)
+        +createBooking(userId, staffId, serviceId, startAt)
+    }
 
-class BookingController {
-  + getAvailableSlots(staffId: String, serviceId: String, date: String): List
-  + createBooking(userId: String, staffId: String, serviceId: String, startAt: DateTime): Appointment
-}
+    class MailService {
+        +sendBookingConfirmation(userEmail, bookingDetails)
+    }
 
-class MailService {
-  + sendBookingConfirmation(userEmail: String, bookingDetails: Object): void
-}
+    %% Quan hệ giữa các bảng Data (Entities)
+    Staff "1" -- "0..*" WorkingHour : has >
+    Staff "1" -- "0..*" Appointment : assigned_to <
+    Service "1" -- "0..*" Appointment : booked_for <
+    AppointmentStatus <-- Appointment : status
 
-' Relationships (Mối quan hệ 4 bảng)
-Staff "1" -- "0..*" WorkingHour : has >
-Staff "1" -- "0..*" Appointment : assigned_to <
-Service "1" -- "0..*" Appointment : booked_for <
-AppointmentStatus <-- Appointment : status
-
-' Business Logic Dependencies
-BookingController ..> Staff : queries
-BookingController ..> Service : queries
-BookingController ..> WorkingHour : checks
-BookingController ..> Appointment : creates/reads
-BookingController ..> MailService : calls
-
-@enduml
+    %% Quan hệ phụ thuộc của Controller/Service
+    BookingController ..> Staff : queries
+    BookingController ..> Service : queries
+    BookingController ..> WorkingHour : checks
+    BookingController ..> Appointment : creates/reads
+    BookingController ..> MailService : calls
 ---
 
 # 🚀 Tính năng chính
