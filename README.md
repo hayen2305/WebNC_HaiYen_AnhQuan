@@ -1,4 +1,4 @@
-# 📅 Booking System API
+# 📅 Hệ Thống Đặt Lịch & Booking Tự Động (Booking System API)
 
 Backend API cho hệ thống **đặt lịch hẹn theo thời gian thực**, hỗ trợ tính toán slot trống động, xử lý đồng thời nhiều yêu cầu đặt lịch và gửi email xác nhận bất đồng bộ.
 
