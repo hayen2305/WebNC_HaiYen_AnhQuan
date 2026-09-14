@@ -264,71 +264,8 @@ giúp tối ưu việc tìm kiếm các appointment của một nhân viên tron
 
 UML DIAGRAM
 
-classDiagram
-    direction TB
+<img width="394" height="322" alt="image" src="https://github.com/user-attachments/assets/f6d92ab6-d2a2-467f-8a10-2e3189ee17a1" />
 
-    class AppointmentStatus {
-        <<enumeration>>
-        PENDING
-        CONFIRMED
-        CANCELLED
-    }
-
-    class Service {
-        +String id
-        +String name
-        +int durationMinutes
-        +Float price
-        +DateTime createdAt
-    }
-
-    class Staff {
-        +String id
-        +String name
-        +String email
-        +DateTime createdAt
-    }
-
-    class WorkingHour {
-        +String id
-        +String staffId
-        +int dayOfWeek
-        +String startTime
-        +String endTime
-    }
-
-    class Appointment {
-        +String id
-        +String userId
-        +String staffId
-        +String serviceId
-        +DateTime startAt
-        +DateTime endAt
-        +AppointmentStatus status
-        +DateTime createdAt
-    }
-
-    class BookingController {
-        +getAvailableSlots(staffId, serviceId, date)
-        +createBooking(userId, staffId, serviceId, startAt)
-    }
-
-    class MailService {
-        +sendBookingConfirmation(userEmail, bookingDetails)
-    }
-
-    %% Quan hệ giữa các bảng Data (Entities)
-    Staff "1" -- "0..*" WorkingHour : has >
-    Staff "1" -- "0..*" Appointment : assigned_to <
-    Service "1" -- "0..*" Appointment : booked_for <
-    AppointmentStatus <-- Appointment : status
-
-    %% Quan hệ phụ thuộc của Controller/Service
-    BookingController ..> Staff : queries
-    BookingController ..> Service : queries
-    BookingController ..> WorkingHour : checks
-    BookingController ..> Appointment : creates/reads
-    BookingController ..> MailService : calls
 ---
 
 # 🚀 Tính năng chính
