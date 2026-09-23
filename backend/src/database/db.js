@@ -42,4 +42,6 @@ if (require.main === module) {
     testConnection();
 }
 
+pool.testConnection = testConnection;
+
 module.exports = pool;

@@ -600,7 +600,11 @@ Ví dụ:
 ```env
 PORT=5000
 
-DATABASE_URL="mysql://USERNAME:PASSWORD@HOST:PORT/DATABASE"
+DB_HOST=mysql-38038dde-yen47575-40a8.k.aivencloud.com
+DB_PORT=27435
+DB_NAME=defaultdb
+DB_USER=avnadmin
+DB_PASSWORD=your_aiven_password
 
 JWT_SECRET="your_jwt_secret"
 
@@ -613,6 +617,8 @@ MAIL_FROM="your_email@example.com"
 
 > Không commit file `.env` lên GitHub.
 
+Có thể sao chép `.env.example` thành `.env`, sau đó thay `DB_PASSWORD` bằng mật khẩu thật của Aiven.
+
 Thêm vào `.gitignore`:
 
 ```text
@@ -622,31 +628,21 @@ node_modules/
 
 ---
 
-# 🗄️ Prisma Setup
+# 🗄️ SQL Database Setup
 
-Sau khi cấu hình `DATABASE_URL`, chạy:
-
-```bash
-npx prisma generate
-```
-
-Sau đó migrate database:
+File SQL của nhóm nằm tại [`backend/database/schema.sql`](backend/database/schema.sql). Sau khi tạo `.env`, chạy lệnh sau để tạo các bảng trên Aiven MySQL:
 
 ```bash
-npx prisma migrate dev --name init
+mysql --host="$DB_HOST" --port="$DB_PORT" --user="$DB_USER" --password="$DB_PASSWORD" "$DB_NAME" < backend/database/schema.sql
 ```
 
-Nếu database đã tồn tại và chỉ muốn đồng bộ schema:
+Hoặc mở `backend/database/schema.sql` trong MySQL Workbench và chạy toàn bộ script.
 
 ```bash
-npx prisma db push
+node -e "require('./dbConnection').testConnection().then(() => console.log('Database connected')).catch(console.error)"
 ```
 
-Có thể mở Prisma Studio bằng:
-
-```bash
-npx prisma studio
-```
+Lệnh trên kiểm tra kết nối đến Aiven MySQL mà không in mật khẩu ra màn hình. Module kết nối sử dụng SSL và pool tối đa 10 kết nối.
 
 ---
 
@@ -667,7 +663,7 @@ npm start
 Server mặc định chạy tại:
 
 ```text
-http://localhost:5000
+http://localhost:3000
 ```
 
 API:
@@ -675,6 +671,23 @@ API:
 ```text
 http://localhost:5000/api/v1
 ```
+
+Kiểm tra kết nối database trong trình duyệt hoặc Postman:
+
+```text
+http://localhost:3000/api/db-status
+```
+
+Khi thành công, response là:
+
+```json
+{
+  "connected": true,
+  "message": "Kết nối Aiven MySQL thành công"
+}
+```
+
+Đây là endpoint dùng để chụp ảnh màn hình chương trình chạy `dbConnection.js` cho bài nộp. Nếu kết nối thất bại, hãy kiểm tra `DB_PASSWORD`, whitelist IP trên Aiven và trạng thái service.
 
 ---
 
