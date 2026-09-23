@@ -1,6 +1,6 @@
 const { randomUUID } = require('crypto');
 const pool = require('../database/db');
-
+// Mô hình cho bảng services
 class Service {
     static async findAll() {
         const [rows] = await pool.query(
