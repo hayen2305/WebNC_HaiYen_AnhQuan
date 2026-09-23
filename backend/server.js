@@ -1,6 +1,8 @@
+const path = require('path');
+require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = require('./app');
 const { testConnection, reminderEngine } = require('./container');
-require('dotenv').config();
 
 const PORT = process.env.PORT || 5000;
 

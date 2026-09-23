@@ -1,6 +1,6 @@
-const { createBooking, cancelBooking } = require('../services/booking.service');
-const { getAvailableSlots } = require('../services/slot.service');
-const { sendBookingConfirmation } = require('../services/mail.service');
+const { createBooking, cancelBooking } = require('../services/booking');
+const { getAvailableSlots } = require('../services/slot');
+const { sendBookingConfirmation } = require('../services/mail');
 
 async function availableSlots(req, res, next) {
     try {
