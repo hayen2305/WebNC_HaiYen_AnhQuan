@@ -195,17 +195,3 @@ curl http://localhost:3000/dangki
 ```
 
 Nếu đã có dữ liệu hoặc xóa/thay đổi CSDL, kiểm tra ID thực tế từ `GET /sinhvien` và `GET /monhoc` rồi thay `sinhVienId` và `monHocId` tương ứng. Không gửi nhiều lần cùng một dữ liệu mẫu vì mã sinh viên/email/mã môn học là duy nhất.
-
-## 7. Kiểm tra trước khi nộp
-
-```bash
-npm run build
-npm run test
-```
-
-Để chuẩn bị ảnh chụp theo yêu cầu bài tập:
-
-1. Chạy `npm run start:dev` và chụp màn hình terminal thể hiện ứng dụng khởi động thành công, CSDL được kết nối.
-2. Dùng Postman hoặc công cụ tương đương gửi `POST /dangki/register`; chụp request và response thành công.
-3. Gửi `GET /dangki`; chụp danh sách đăng ký trả về, trong đó có sinh viên và môn học.
-4. Chèn các ảnh chụp vào văn bản bài nộp cùng với mã nguồn.
