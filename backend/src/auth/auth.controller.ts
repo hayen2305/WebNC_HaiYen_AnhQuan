@@ -6,7 +6,7 @@ import { AuthService, LoginDto } from './auth.service.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('login')
@@ -18,5 +18,10 @@ export class AuthController {
   @Get('profile')
   getProfile(@Req() req: Request & { user?: { id: number; maSV: string; email: string; ten: string } }) {
     return req.user;
+  }
+  @Get('logout')
+  logout(@Req() req: Request & { user?: { id: number; maSV: string; email: string; ten: string } }) {
+    // Implement logout logic here, if needed
+    return { message: 'Logged out successfully' };
   }
 }
