@@ -6,6 +6,22 @@
   color: #1f2d3d;
 }
 
+.app-banner-image {
+  height: 400px;
+  object-fit: cover;
+}
+
+.app-banner-image {
+  height: 400px;
+  object-fit: cover;
+}
+
+@media (max-width: 576px) {
+  .app-banner-image {
+    height: 260px;
+  }
+}
+
 .browser-bar {
   height: 52px;
   display: flex;
@@ -97,6 +113,18 @@
   padding: 18px 26px 14px;
   background: rgba(255, 255, 255, 0.28);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.app-banner {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.app-banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .brand {
