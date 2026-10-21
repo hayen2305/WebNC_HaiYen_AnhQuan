@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@nestjs/config": "^12.0.1",
-    "bootstrap": "^5.3.8",
-    "react-bootstrap": "^2.10.10"
-  }
-}
