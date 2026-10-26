@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
+import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface.js';
 import { memoryStorage } from 'multer';
 
 // File lưu tạm trong RAM rồi đẩy thẳng lên Cloudinary, không ghi ra ổ đĩa server.
