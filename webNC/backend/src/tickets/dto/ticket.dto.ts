@@ -6,8 +6,9 @@ export class CreateTicketDto {
   severity?: 'LOW' | 'MEDIUM' | 'HIGH';
 }
 
-export class UpdateTicketStatusDto {
-  status: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED';
+export class UpdateTicketDto {
+  status?: 'PENDING' | 'IN_PROGRESS' | 'RESOLVED';
+  admin_note?: string;
 }
 
 export class TicketQueryDto {

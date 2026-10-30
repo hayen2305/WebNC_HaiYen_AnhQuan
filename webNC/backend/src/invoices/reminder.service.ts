@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { todayInAppTz } from '../common/date.util';
 import { InvoiceRepository } from './invoice.repository';
 
 /**
@@ -50,7 +51,7 @@ export class ReminderService implements OnModuleInit {
   }
 
   private todayISO() {
-    return new Date().toISOString().slice(0, 10);
+    return todayInAppTz();
   }
 
   private resolveStage(diffDays: number) {

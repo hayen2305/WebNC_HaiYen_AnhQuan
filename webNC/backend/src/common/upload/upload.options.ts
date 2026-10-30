@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface.js';
+import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { memoryStorage } from 'multer';
 
 // File lưu tạm trong RAM rồi đẩy thẳng lên Cloudinary, không ghi ra ổ đĩa server.
@@ -25,5 +25,15 @@ export const avatarUploadOptions: MulterOptions = {
   fileFilter: (_req, file, cb) => {
     if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) return cb(null, true);
     cb(new BadRequestException('Ảnh đại diện chỉ hỗ trợ định dạng JPG, PNG hoặc WEBP.'), false);
+  },
+};
+
+/** Ảnh phòng — tối đa 5MB. */
+export const roomImageUploadOptions: MulterOptions = {
+  storage: memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) return cb(null, true);
+    cb(new BadRequestException('Ảnh phòng chỉ hỗ trợ định dạng JPG, PNG hoặc WEBP.'), false);
   },
 };

@@ -2,9 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
-export interface MeterReading {
-  new_electricity: number | null;
-  new_water: number | null;
+export interface BillAmounts {
+  /** Tiền điện phải thanh toán (VNĐ) */
+  electricity_amount: number | string | null;
+  /** Tiền nước phải thanh toán (VNĐ) */
+  water_amount: number | string | null;
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
   raw_text: string;
 }
@@ -155,18 +157,19 @@ Câu hỏi mới: ${question}`;
     return data.choices?.[0]?.message?.content?.trim() || fallback;
   }
 
-  /** Bóc tách chỉ số điện/nước từ ảnh công tơ hoặc ảnh/PDF hóa đơn gốc. */
-  extractMeterReading(imageBase64: string, mimeType: string): Promise<MeterReading> {
-    const prompt = `Bạn là hệ thống OCR đọc chỉ số công tơ điện/nước hoặc hóa đơn điện nước tại Việt Nam.
+  /** Bóc tách SỐ TIỀN điện/nước phải thanh toán từ ảnh/PDF hóa đơn điện nước gốc. */
+  extractBillAmounts(imageBase64: string, mimeType: string): Promise<BillAmounts> {
+    const prompt = `Bạn là hệ thống OCR đọc HÓA ĐƠN TIỀN ĐIỆN / TIỀN NƯỚC tại Việt Nam.
 Hãy đọc ảnh/tài liệu được đính kèm và trả về JSON theo đúng schema sau:
 {
-  "new_electricity": number hoặc null,
-  "new_water": number hoặc null,
+  "electricity_amount": số tiền điện phải thanh toán (VNĐ, số nguyên, không có dấu chấm/phẩy ngăn cách) hoặc null,
+  "water_amount": số tiền nước phải thanh toán (VNĐ, số nguyên, không có dấu chấm/phẩy ngăn cách) hoặc null,
   "confidence": "HIGH" | "MEDIUM" | "LOW",
   "raw_text": "toàn bộ text nhận diện được từ ảnh, để chủ trọ đối chiếu thủ công nếu cần"
 }
-Nếu ảnh chỉ có 1 trong 2 chỉ số, để giá trị còn lại là null.`;
-    return this.callVisionJSON<MeterReading>(imageBase64, mimeType, prompt);
+Chỉ lấy SỐ TIỀN phải thanh toán (tổng cộng, đã gồm thuế/phí nếu có). KHÔNG lấy chỉ số công tơ hay lượng tiêu thụ (kWh, m3).
+Nếu ảnh chỉ có 1 trong 2 loại hóa đơn, hoặc không thấy số tiền, để giá trị tương ứng là null.`;
+    return this.callVisionJSON<BillAmounts>(imageBase64, mimeType, prompt);
   }
 
   /** Phân tích ảnh sự cố: phân loại + hướng dẫn xử lý tạm thời an toàn cho khách thuê. */

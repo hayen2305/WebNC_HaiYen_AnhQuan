@@ -8,9 +8,11 @@ import { DatabaseModule } from './database/database.module';
 import { HealthController } from './health.controller';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { InvoicesModule } from './invoices/invoices.module';
+import { ReportsModule } from './reports/reports.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { SupportModule } from './support/support.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -30,8 +32,10 @@ import { TicketsModule } from './tickets/tickets.module';
     RoomsModule,
     ContractsModule,
     InvoicesModule,
+    ReportsModule,
     TicketsModule,
     SupportModule,
+    UsersModule,
   ],
   controllers: [HealthController],
 })

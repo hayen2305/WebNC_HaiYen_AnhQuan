@@ -1,9 +1,10 @@
 import {
-  BadRequestException, ConflictException, HttpException, Injectable,
+  BadRequestException, ConflictException, ForbiddenException, HttpException, Injectable,
   NotFoundException, UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { profileFields } from '../common/validators';
 import { CloudinaryService } from '../integrations/cloudinary.service';
 import { RegisterDto } from './dto/auth.dto';
 import { User } from './entities/user.entity';
@@ -32,10 +33,17 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) throw new UnauthorizedException('Email hoặc mật khẩu không đúng.');
 
+    if (!row.is_active) throw new ForbiddenException('Tài khoản đã bị khóa. Vui lòng liên hệ chủ trọ.');
+
     return { token: this.signToken(user), user: user.toPublicJSON() };
   }
 
-  async register({ full_name, email, phone, password }: RegisterDto) {
+  async register(body: RegisterDto) {
+    const { password } = body;
+    const { full_name, email, phone } = { ...body, ...profileFields(body) };
+    if (typeof password !== 'string' || password.length < 6) {
+      throw new BadRequestException('Mật khẩu phải có ít nhất 6 ký tự.');
+    }
     const existing = await this.userRepository.findByEmailOrPhone(email, phone);
     if (existing) throw new ConflictException('Email hoặc số điện thoại đã được sử dụng.');
 

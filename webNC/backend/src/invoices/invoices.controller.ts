@@ -1,5 +1,5 @@
 import {
-  BadRequestException, Body, Controller, Get, Headers, HttpCode, Param, Post, Put,
+  BadRequestException, Body, Controller, Delete, Get, Headers, HttpCode, Param, Post, Put,
   Query, ServiceUnavailableException, UnauthorizedException, UploadedFile, UseInterceptors,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,7 +9,7 @@ import { AuthUser } from '../common/auth-user';
 import { Auth } from '../common/decorators/auth.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { mediaUploadOptions } from '../common/upload/upload.options';
-import { BankWebhookDto, CreateInvoiceDto, InvoiceQueryDto } from './dto/invoice.dto';
+import { BankWebhookDto, CreateInvoiceDto, InvoiceQueryDto, PayInvoiceDto, TenantInvoiceQueryDto, UpdateInvoiceDto } from './dto/invoice.dto';
 import { InvoicesService } from './invoices.service';
 import { ReminderService } from './reminder.service';
 
@@ -58,14 +58,28 @@ export class InvoicesController {
 
   @Get('tenant')
   @Auth('TENANT')
-  getTenantInvoices(@CurrentUser() user: AuthUser) {
-    return this.invoicesService.listForTenant(user.id);
+  getTenantInvoices(@CurrentUser() user: AuthUser, @Query() query: TenantInvoiceQueryDto) {
+    return this.invoicesService.listForTenant(user.id, { from: query.from, to: query.to });
+  }
+
+  @Put(':id')
+  @Auth('ADMIN')
+  async updateInvoice(@Param('id') id: string, @Body() dto: UpdateInvoiceDto) {
+    const result = await this.invoicesService.updateInvoice(id, dto);
+    return { ...result, message: 'Cập nhật hóa đơn thành công.' };
+  }
+
+  @Delete(':id')
+  @Auth('ADMIN')
+  async deleteInvoice(@Param('id') id: string) {
+    await this.invoicesService.deleteInvoice(id);
+    return { message: 'Đã xóa hóa đơn.' };
   }
 
   @Put(':id/pay')
   @Auth('ADMIN')
-  async payInvoice(@Param('id') id: string) {
-    await this.invoicesService.markPaid(id);
+  async payInvoice(@Param('id') id: string, @Body() dto: PayInvoiceDto) {
+    await this.invoicesService.markPaid(id, dto?.payment_method);
     return { message: 'Đã cập nhật hóa đơn sang trạng thái Đã thanh toán.' };
   }
 

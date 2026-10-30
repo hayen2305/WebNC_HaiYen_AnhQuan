@@ -8,6 +8,7 @@ export class User {
   avatar_url: string | null;
   password_hash: string;
   role: Role;
+  is_active?: number;
   created_at?: string;
 
   constructor(row: Partial<User>) {
