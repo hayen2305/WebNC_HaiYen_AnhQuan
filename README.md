@@ -104,3 +104,10 @@ Hệ thống quản lý nhà trọ và tự động hóa hóa đơn thanh toán,
 - Ưu tiên hiển thị **room_number** trên giao diện.
 - CSDL phi chuẩn hóa: chấp nhận dư thừa để tối ưu tốc độ.
 - Cronjob & Webhook ngân hàng là thành phần quan trọng để tự động hóa.
+
+---
+
+## Tai lieu huong dan
+
+- [Huong dan cai dat va chay du an](SETUP.md)
+- [Huong dan su dung Admin va Tenant](USER_GUIDE.md)
