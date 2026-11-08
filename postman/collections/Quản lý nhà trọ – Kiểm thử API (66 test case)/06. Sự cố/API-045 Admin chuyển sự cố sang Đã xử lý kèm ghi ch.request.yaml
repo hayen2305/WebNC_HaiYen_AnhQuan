@@ -1,0 +1,15 @@
+$kind: http-request
+name: API-045 Admin chuyển sự cố sang Đã xử lý kèm ghi chú
+url: "{{baseUrl}}/tickets/{{tk}}"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"status": "RESOLVED", "admin_note": "Da sua"}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 4000

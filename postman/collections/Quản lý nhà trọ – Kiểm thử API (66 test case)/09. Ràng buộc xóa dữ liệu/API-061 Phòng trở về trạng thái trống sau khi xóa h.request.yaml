@@ -1,0 +1,14 @@
+$kind: http-request
+name: API-061 Phòng trở về trạng thái trống sau khi xóa hợp đồng
+url: "{{baseUrl}}/rooms/{{rB}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Phòng trống', () => pm.expect(j.status).to.eql('EMPTY'));
+    language: text/javascript
+order: 8000

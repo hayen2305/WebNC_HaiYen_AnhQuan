@@ -10,7 +10,10 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
     "dev": "nest start --watch",
-    "seed": "nest build && node dist/seed.js"
+    "seed": "nest build && node dist/seed.js",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "test:api": "newman run postman/nha-tro-api.postman_collection.json"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.3",
@@ -24,6 +27,7 @@
     "cloudinary": "^2.11.0",
     "cron": "^4.4.0",
     "dotenv": "^18.0.8",
+    "exceljs": "^4.4.0",
     "multer": "^2.4.0",
     "mysql2": "^3.24.6",
     "reflect-metadata": "^0.2.2",
@@ -32,9 +36,54 @@
   "devDependencies": {
     "@nestjs/cli": "^12.0.8",
     "@nestjs/schematics": "^12.0.0",
+    "@swc/core": "^1.16.21",
+    "@swc/jest": "^0.2.39",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.5",
+    "jest": "^30.5.2",
+    "newman": "^6.2.3",
     "typescript": "^6.0.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.[tj]s$": [
+        "@swc/jest",
+        {
+          "jsc": {
+            "target": "es2022",
+            "parser": {
+              "syntax": "typescript",
+              "decorators": true
+            },
+            "transform": {
+              "legacyDecorator": true,
+              "decoratorMetadata": true
+            }
+          },
+          "module": {
+            "type": "commonjs"
+          }
+        }
+      ]
+    },
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.service.ts",
+      "common/**/*.ts",
+      "!**/*.module.ts"
+    ],
+    "coverageDirectory": "../coverage",
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(@nestjs|rxjs|file-type|uid|iterare)/)"
+    ]
   }
 }

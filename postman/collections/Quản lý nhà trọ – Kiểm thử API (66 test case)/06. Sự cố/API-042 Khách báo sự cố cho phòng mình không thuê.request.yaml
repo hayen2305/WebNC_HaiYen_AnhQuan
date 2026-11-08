@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/tickets"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+body:
+  type: json
+  content: '{"room_id": "{{rB}}", "title": "x"}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));
+    language: text/javascript
+order: 1000

@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts/{{c4}}/cancel"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t2}}
+scripts:
+  - type: beforeRequest
+    code: |-
+      pm.sendRequest({
+        url: pm.collectionVariables.get('baseUrl') + '/contracts/request',
+        method: 'POST',
+        header: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + pm.collectionVariables.get('t2') },
+        body: { mode: 'raw', raw: JSON.stringify({ room_id: Number(pm.collectionVariables.get('rB')), rental_type: 'MONTHLY', start_date: pm.collectionVariables.get('today'), months: 1 }) }
+      }, (err, res) => { pm.collectionVariables.set('c4', res.json().id); });
+    language: text/javascript
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 11000

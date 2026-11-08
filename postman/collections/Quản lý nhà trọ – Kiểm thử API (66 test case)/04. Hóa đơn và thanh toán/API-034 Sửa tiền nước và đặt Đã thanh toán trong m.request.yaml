@@ -1,0 +1,15 @@
+$kind: http-request
+name: API-034 Sửa tiền nước và đặt Đã thanh toán trong một lần
+url: "{{baseUrl}}/invoices/{{i1}}"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"payment_status": "PAID", "water": 70000}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 15000

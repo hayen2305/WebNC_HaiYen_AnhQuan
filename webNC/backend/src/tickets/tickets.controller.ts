@@ -7,7 +7,7 @@ import { AuthUser } from '../common/auth-user';
 import { Auth } from '../common/decorators/auth.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { mediaUploadOptions } from '../common/upload/upload.options';
-import { CreateTicketDto, TicketQueryDto, UpdateTicketStatusDto } from './dto/ticket.dto';
+import { CreateTicketDto, TicketQueryDto, UpdateTicketDto } from './dto/ticket.dto';
 import { TicketsService } from './tickets.service';
 
 @Controller('tickets')
@@ -26,8 +26,14 @@ export class TicketsController {
   @Post()
   @Auth('TENANT')
   async create(@CurrentUser() user: AuthUser, @Body() dto: CreateTicketDto) {
-    const id = await this.ticketsService.create({ ...dto, tenant_id: user.id, tenant_name: user.full_name });
+    const id = await this.ticketsService.create({ ...dto, tenant_id: user.id });
     return { id, message: 'Đã gửi báo cáo sự cố.' };
+  }
+
+  @Get('my')
+  @Auth('TENANT')
+  listMine(@CurrentUser() user: AuthUser) {
+    return this.ticketsService.listMine(user.id);
   }
 
   @Get()
@@ -38,8 +44,8 @@ export class TicketsController {
 
   @Put(':id')
   @Auth('ADMIN')
-  async updateStatus(@Param('id') id: string, @Body() dto: UpdateTicketStatusDto) {
-    await this.ticketsService.updateStatus(id, dto?.status);
-    return { message: 'Đã cập nhật trạng thái ticket.' };
+  async handle(@Param('id') id: string, @Body() dto: UpdateTicketDto) {
+    await this.ticketsService.handle(id, dto || {});
+    return { message: 'Đã cập nhật ticket.' };
   }
 }

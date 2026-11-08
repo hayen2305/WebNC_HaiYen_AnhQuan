@@ -7,7 +7,7 @@ schema MySQL (`sql/schema.sql`) và format response `{ message }` nên frontend 
 ```bash
 cp .env.example .env      # điền DB_*, JWT_SECRET, ...
 npm install
-mysql < sql/schema.sql    # nạp schema vào database đã chọn
+mysql < sql/schema.sql    # nạp schema vào database đã chọn (DB đã có dữ liệu: sao lưu rồi chạy sql/migrations/*.sql theo thứ tự tên file)
 npm run start:dev         # http://localhost:5000/api/health
 npm run seed             # tạo tài khoản admin@local.com / Admin@123
 ```
@@ -20,7 +20,7 @@ src/
                  filter lỗi tập trung, cấu hình upload (multer)
   database/      MySQL pool (mysql2) dùng chung, BaseRepository
   integrations/  CloudinaryService, OcrService (Gemini / OpenAI)
-  auth/ rooms/ contracts/ invoices/ tickets/ support/
+  auth/ rooms/ contracts/ invoices/ bookings/ users/ tickets/ support/
                  mỗi module: controller -> service -> repository (+ dto, entities)
   invoices/      PaymentService (VietQR + webhook), ReminderService (cron nhắc nợ)
 ```

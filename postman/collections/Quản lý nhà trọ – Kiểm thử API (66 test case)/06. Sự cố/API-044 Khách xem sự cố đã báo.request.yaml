@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/tickets/my"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('1 sự cố, có số phòng', () => {
+        pm.expect(j.length).to.eql(1);
+        pm.expect(j[0].room_number).to.match(/^A/);
+      });
+    language: text/javascript
+order: 3000

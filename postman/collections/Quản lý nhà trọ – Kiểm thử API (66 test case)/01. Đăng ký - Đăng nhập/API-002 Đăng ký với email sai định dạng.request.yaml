@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{"full_name": "x", "email": "bad", "phone": "0911111111", "password": "123456"}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));
+    language: text/javascript
+order: 2000

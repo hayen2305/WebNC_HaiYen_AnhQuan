@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/users/me"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+body:
+  type: json
+  content: '{"email": "admin@local.com"}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));
+    language: text/javascript
+order: 2000

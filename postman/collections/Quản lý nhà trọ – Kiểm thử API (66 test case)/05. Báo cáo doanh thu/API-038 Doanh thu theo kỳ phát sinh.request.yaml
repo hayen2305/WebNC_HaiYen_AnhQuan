@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/reports/revenue?basis=period&from={{year}}-01-01&to={{today}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  basis: period
+  from: "{{year}}-01-01"
+  to: "{{today}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      const v = k => Number(pm.collectionVariables.get(k));
+      pm.test('Phát sinh tăng 3.580.000; đã thu tăng 3.280.000; chưa thu tăng 300.000', () => {
+        pm.expect(j.summary.billed - v('basePeriodBilled')).to.eql(3580000);
+        pm.expect(j.summary.collected - v('basePeriodCollected')).to.eql(3280000);
+        pm.expect(j.summary.outstanding - v('basePeriodOutstanding')).to.eql(300000);
+      });
+    language: text/javascript
+order: 2000

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices/tenant?from=abc"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+queryParams:
+  from: abc
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));
+    language: text/javascript
+order: 9000

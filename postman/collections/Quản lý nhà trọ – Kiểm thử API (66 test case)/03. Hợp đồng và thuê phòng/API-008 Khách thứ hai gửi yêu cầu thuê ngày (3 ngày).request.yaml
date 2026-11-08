@@ -1,0 +1,18 @@
+$kind: http-request
+name: API-008 Khách thứ hai gửi yêu cầu thuê ngày (3 ngày) cho cùng phòng
+url: "{{baseUrl}}/contracts/request"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t2}}
+body:
+  type: json
+  content: '{"room_id": "{{rA}}", "rental_type": "DAILY", "start_date": "{{today}}", "days": 3}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('c2', j.id);
+    language: text/javascript
+order: 3000

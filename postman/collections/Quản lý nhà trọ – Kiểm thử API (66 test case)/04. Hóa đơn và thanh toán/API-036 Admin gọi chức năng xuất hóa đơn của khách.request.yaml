@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices/tenant/export"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));
+    language: text/javascript
+order: 17000

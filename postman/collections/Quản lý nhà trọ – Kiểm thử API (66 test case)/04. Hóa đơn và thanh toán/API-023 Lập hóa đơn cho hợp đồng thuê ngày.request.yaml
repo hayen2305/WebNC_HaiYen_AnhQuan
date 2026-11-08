@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"contract_id": "{{c3}}", "month": "{{month}}", "year": "{{year}}", "due_date": "{{today}}"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('i3', j.id);
+    language: text/javascript
+order: 4000

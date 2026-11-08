@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts/mine"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('tenant_name = Khach Mot', () => pm.expect(j[0].tenant_name).to.eql('Khach Mot'));
+    language: text/javascript
+order: 3000

@@ -1,0 +1,18 @@
+$kind: http-request
+name: API-017 Admin tạo trực tiếp hợp đồng thuê ngày (2 ngày)
+url: "{{baseUrl}}/contracts"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"room_id": "{{rB}}", "tenant_id": "{{t2id}}", "rental_type": "DAILY", "start_date": "{{today}}", "days": 2}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('c3', j.id);
+    language: text/javascript
+order: 12000

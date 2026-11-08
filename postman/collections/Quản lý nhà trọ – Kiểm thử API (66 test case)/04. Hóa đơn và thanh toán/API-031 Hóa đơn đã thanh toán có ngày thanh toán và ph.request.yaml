@@ -1,0 +1,19 @@
+$kind: http-request
+name: API-031 Hóa đơn đã thanh toán có ngày thanh toán và phương thức
+url: "{{baseUrl}}/invoices/admin"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      const i = j.find(x => x.id == pm.collectionVariables.get('i1'));
+      pm.test('PAID, có paid_at, BANK_TRANSFER', () => {
+        pm.expect(i.payment_status).to.eql('PAID');
+        pm.expect(i.paid_at).to.be.a('string');
+        pm.expect(i.payment_method).to.eql('BANK_TRANSFER');
+      });
+    language: text/javascript
+order: 12000

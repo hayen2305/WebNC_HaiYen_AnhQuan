@@ -1,0 +1,15 @@
+$kind: http-request
+name: API-024 Tổng tiền hóa đơn hợp đồng thuê ngày = 300.000
+url: "{{baseUrl}}/invoices/admin"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      const i = j.find(x => x.id == pm.collectionVariables.get('i3'));
+      pm.test('2 ngày × 150.000', () => pm.expect(Number(i.total_amount)).to.eql(300000));
+    language: text/javascript
+order: 5000

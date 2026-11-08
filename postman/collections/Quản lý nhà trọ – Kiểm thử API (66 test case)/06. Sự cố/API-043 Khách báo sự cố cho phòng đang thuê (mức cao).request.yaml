@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/tickets"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+body:
+  type: json
+  content: '{"room_id": "{{rA}}", "title": "Hong voi", "severity": "HIGH"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('tk', j.id);
+    language: text/javascript
+order: 2000

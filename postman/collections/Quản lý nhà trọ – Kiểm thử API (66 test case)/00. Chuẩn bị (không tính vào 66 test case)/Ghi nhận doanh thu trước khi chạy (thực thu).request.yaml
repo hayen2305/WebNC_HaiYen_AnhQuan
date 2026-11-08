@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/reports/revenue?basis=paid&from={{year}}-01-01&to={{today}}&group=day"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  basis: paid
+  from: "{{year}}-01-01"
+  to: "{{today}}"
+  group: day
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.collectionVariables.set('basePaidCollected', j.summary.collected);
+    language: text/javascript
+order: 2000

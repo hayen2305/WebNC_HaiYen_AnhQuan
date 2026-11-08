@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{"full_name": "Khach 2", "email": "k2_{{sfx}}@x.com", "phone": "092{{sfx}}20", "password": "123456"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('t2', j.token);
+      pm.collectionVariables.set('t2id', j.user.id);
+    language: text/javascript
+order: 4000

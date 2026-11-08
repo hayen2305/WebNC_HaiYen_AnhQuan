@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/users/me"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+body:
+  type: json
+  content: '{"full_name": "Khach Mot", "phone": "098{{sfx}}11"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+      const j = pm.response.json();
+      pm.test('Tên mới được lưu', () => pm.expect(j.user.full_name).to.eql('Khach Mot'));
+    language: text/javascript
+order: 1000

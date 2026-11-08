@@ -1,8 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { nowInAppTz } from '../common/date.util';
+import { ContractRepository } from '../contracts/contract.repository';
 import { CloudinaryService } from '../integrations/cloudinary.service';
 import { IssueAnalysis, OcrService } from '../integrations/ocr.service';
 import { RoomRepository } from '../rooms/room.repository';
-import { CreateTicketDto, TicketQueryDto } from './dto/ticket.dto';
+import { CreateTicketDto, TicketQueryDto, UpdateTicketDto } from './dto/ticket.dto';
 import { TicketRepository } from './ticket.repository';
 
 const TICKET_STATUSES = ['PENDING', 'IN_PROGRESS', 'RESOLVED'];
@@ -14,6 +16,7 @@ export class TicketsService {
     private readonly roomRepository: RoomRepository,
     private readonly cloudinaryService: CloudinaryService,
     private readonly ocrService: OcrService,
+    private readonly contractRepository: ContractRepository,
   ) {}
 
   /**
@@ -46,7 +49,7 @@ export class TicketsService {
     return { image_url: uploadResult.secure_url, ...analysis };
   }
 
-  async create(data: CreateTicketDto & { tenant_id: number; tenant_name: string }) {
+  async create(data: CreateTicketDto & { tenant_id: number }) {
     const { room_id } = data;
     const title = data.title || 'Báo cáo sự cố';
     if (!room_id) throw new BadRequestException('Thiếu Số phòng hoặc Tiêu đề sự cố.');
@@ -54,9 +57,15 @@ export class TicketsService {
     const room = await this.roomRepository.findById(room_id);
     if (!room) throw new NotFoundException('Không tìm thấy phòng.');
 
+    const mine = await this.contractRepository.findAll({ tenant_id: data.tenant_id, status: 'ACTIVE' });
+    if (!mine.some((c: any) => Number(c.room_id) === Number(room_id))) {
+      throw new ForbiddenException('Bạn chỉ có thể báo sự cố cho phòng mình đang thuê.');
+    }
+
     return this.ticketRepository.create({
-      room_id, tenant_id: data.tenant_id, room_number: room.room_number, tenant_name: data.tenant_name,
-      title, description: data.description, image_url: data.image_url, severity: data.severity,
+      room_id, tenant_id: data.tenant_id,
+      title: String(title).slice(0, 255), description: data.description, image_url: data.image_url,
+      severity: ['LOW', 'MEDIUM', 'HIGH'].includes(data.severity as string) ? data.severity : 'MEDIUM',
     });
   }
 
@@ -64,9 +73,21 @@ export class TicketsService {
     return this.ticketRepository.findAll(filters);
   }
 
-  async updateStatus(id: string, status: string) {
-    if (!TICKET_STATUSES.includes(status)) throw new BadRequestException('Trạng thái không hợp lệ.');
-    const affected = await this.ticketRepository.updateStatus(id, status);
-    if (affected === 0) throw new NotFoundException('Không tìm thấy ticket.');
+  listMine(tenantId: number) {
+    return this.ticketRepository.findByTenant(tenantId);
+  }
+
+  /** Admin xử lý sự cố: đổi trạng thái và/hoặc ghi chú phản hồi. */
+  async handle(id: string, { status, admin_note }: UpdateTicketDto = {} as UpdateTicketDto) {
+    const t = await this.ticketRepository.findById(id);
+    if (!t) throw new NotFoundException('Không tìm thấy ticket.');
+    const next = status === undefined ? t.status : status;
+    if (!TICKET_STATUSES.includes(next)) throw new BadRequestException('Trạng thái không hợp lệ.');
+    let note = t.admin_note;
+    if (admin_note !== undefined) note = String(admin_note || '').trim().slice(0, 255) || null;
+    let resolved_at = t.resolved_at;
+    if (next === 'RESOLVED' && t.status !== 'RESOLVED') resolved_at = nowInAppTz();
+    if (next !== 'RESOLVED') resolved_at = null;
+    await this.ticketRepository.updateHandling(id, { status: next, admin_note: note, resolved_at });
   }
 }

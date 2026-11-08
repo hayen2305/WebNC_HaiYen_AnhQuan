@@ -1,0 +1,32 @@
+$kind: collection
+description: Chạy toàn bộ collection (Runner) trên DATABASE MỚI đã seed admin. Thứ tự các request quan trọng, không đảo.
+variables:
+  baseUrl: http://localhost:5000/api
+  adminEmail: admin@local.com
+  adminPassword: Admin@123
+  sfx: ""
+  today: ""
+  year: ""
+  yearPlus1: ""
+  yearPlus5: ""
+  month: ""
+  ym: ""
+  adm: ""
+  basePaidCollected: ""
+  basePeriodBilled: ""
+  basePeriodCollected: ""
+  basePeriodOutstanding: ""
+  t2: ""
+  t2id: ""
+  rA: ""
+  rB: ""
+  rC: ""
+  t1: ""
+  t1id: ""
+  c1: ""
+  c2: ""
+  c3: ""
+  i1: ""
+  i3: ""
+  tk: ""
+  c4: ""

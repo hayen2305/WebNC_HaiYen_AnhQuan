@@ -1,0 +1,23 @@
+$kind: http-request
+name: "API-053 Admin mở khóa: tài khoản dùng lại được"
+url: "{{baseUrl}}/users/{{t2id}}/active"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"is_active": true}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+      pm.sendRequest({
+        url: pm.collectionVariables.get('baseUrl') + '/rooms',
+        method: 'GET',
+        header: { Authorization: 'Bearer ' + pm.collectionVariables.get('t2') }
+      }, (err, res) => {
+        pm.test('Khách vừa được mở khóa gọi API được (200)', () => pm.expect(res.code).to.eql(200));
+      });
+    language: text/javascript
+order: 4000

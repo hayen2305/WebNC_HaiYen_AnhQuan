@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/reports/revenue?basis=paid&from={{year}}-01-01&to={{today}}&group=day"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  basis: paid
+  from: "{{year}}-01-01"
+  to: "{{today}}"
+  group: day
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+      const j = pm.response.json();
+      const v = k => Number(pm.collectionVariables.get(k));
+      pm.test('Thực thu tăng đúng 3.280.000 so với trước khi chạy', () => pm.expect(j.summary.collected - v('basePaidCollected')).to.eql(3280000));
+      pm.test('Có dòng theo ngày', () => pm.expect(j.series.length).to.be.at.least(1));
+      pm.test('Có phòng vừa tạo trong báo cáo theo phòng', () => pm.expect(j.by_room.some(r => r.room_number === 'A' + pm.collectionVariables.get('sfx'))).to.be.true);
+    language: text/javascript
+order: 1000

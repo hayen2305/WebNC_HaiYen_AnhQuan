@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts/{{c4}}/cancel"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t2}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));
+    language: text/javascript
+order: 12000

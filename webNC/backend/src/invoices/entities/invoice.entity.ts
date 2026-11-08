@@ -5,16 +5,21 @@ export interface InvoiceRow {
   tenant_id: number;
   room_number: string;
   tenant_name: string;
+  rental_type: 'MONTHLY' | 'DAILY';
   month: number;
   year: number;
-  electricity: number;
-  water: number;
   room_fee: number;
-  electricity_fee: number;
-  water_fee: number;
+  /** TIỀN điện (VNĐ) — cột electricity_fee. */
+  electricity: number;
+  /** TIỀN nước (VNĐ) — cột water_fee. */
+  water: number;
   other_fee: number;
+  /** Cột tự tính trong DB = room_fee + electricity_fee + water_fee + other_fee. */
   total_amount: number;
   payment_status: 'UNPAID' | 'PAID';
+  paid_at: string | null;
+  payment_method: string | null;
+  transaction_ref: string | null;
   due_date: string;
   bill_file_url: string | null;
   last_reminder_sent_at: string | null;
@@ -23,23 +28,20 @@ export interface InvoiceRow {
 }
 
 export interface InvoiceCalcInput {
-  electricity: number;
-  water: number;
   roomPrice: number | string;
-  electricityRate: number;
-  waterRate: number;
-  serviceFee?: number | string;
-  otherFee?: number | string;
+  /** Tiền điện (VNĐ) */
+  electricity: number;
+  /** Tiền nước (VNĐ) */
+  water: number;
+  /** Phụ phí khác (VNĐ) */
+  otherFee?: number;
 }
 
-/** Công thức tính tiền hóa đơn — thuộc phạm vi entity, không phụ thuộc ai gọi. */
+/** Công thức tính tổng hóa đơn (chỉ để hiển thị trước; DB tự tính total_amount). */
 export class Invoice {
-  static calculate({
-    electricity, water, roomPrice, electricityRate, waterRate, serviceFee = 0, otherFee = 0,
-  }: InvoiceCalcInput) {
-    const electricityFee = electricity * electricityRate;
-    const waterFee = water * waterRate;
-    const totalAmount = Number(roomPrice) + electricityFee + waterFee + Number(serviceFee) + Number(otherFee);
-    return { electricity, water, electricityFee, waterFee, roomFee: roomPrice, totalAmount };
+  static calculate({ roomPrice, electricity, water, otherFee = 0 }: InvoiceCalcInput) {
+    const roomFee = Number(roomPrice);
+    const totalAmount = roomFee + electricity + water + otherFee;
+    return { roomFee, electricity, water, otherFee, totalAmount };
   }
 }

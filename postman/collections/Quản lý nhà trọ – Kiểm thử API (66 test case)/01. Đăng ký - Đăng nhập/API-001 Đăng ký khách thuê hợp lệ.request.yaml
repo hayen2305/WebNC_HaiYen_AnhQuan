@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{"full_name": "Khach 1", "email": "k1_{{sfx}}@x.com", "phone": "091{{sfx}}10", "password": "123456"}'
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Trả về token đăng nhập', () => pm.expect(j.token).to.be.a('string'));
+      pm.test('Vai trò là TENANT', () => pm.expect(j.user.role).to.eql('TENANT'));
+      pm.collectionVariables.set('t1', j.token);
+      pm.collectionVariables.set('t1id', j.user.id);
+    language: text/javascript
+order: 1000

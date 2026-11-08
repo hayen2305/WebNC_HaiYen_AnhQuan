@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts/request"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t2}}
+body:
+  type: json
+  content: '{"room_id": "{{rA}}", "rental_type": "DAILY", "start_date": "2020-01-01", "days": 3}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));
+    language: text/javascript
+order: 4000

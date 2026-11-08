@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices/{{i1}}/pay"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"payment_method": "BANK_TRANSFER"}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 10000

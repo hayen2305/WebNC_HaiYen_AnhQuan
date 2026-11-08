@@ -1,0 +1,22 @@
+$kind: http-request
+url: "{{baseUrl}}/reports/revenue/export?basis=paid&from={{year}}-01-01&to={{today}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  basis: paid
+  from: "{{year}}-01-01"
+  to: "{{today}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+      const b = pm.response.stream;
+      const a = b.data || b;
+      pm.test('Tệp .xlsx hợp lệ (bắt đầu bằng PK)', () => {
+        pm.expect(a[0]).to.eql(0x50);
+        pm.expect(a[1]).to.eql(0x4B);
+      });
+    language: text/javascript
+order: 5000

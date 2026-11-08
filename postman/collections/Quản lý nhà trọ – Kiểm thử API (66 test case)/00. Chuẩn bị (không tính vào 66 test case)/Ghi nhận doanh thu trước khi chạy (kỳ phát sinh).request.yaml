@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{baseUrl}}/reports/revenue?basis=period&from={{year}}-01-01&to={{today}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  basis: period
+  from: "{{year}}-01-01"
+  to: "{{today}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.collectionVariables.set('basePeriodBilled', j.summary.billed);
+      pm.collectionVariables.set('basePeriodCollected', j.summary.collected);
+      pm.collectionVariables.set('basePeriodOutstanding', j.summary.outstanding);
+    language: text/javascript
+order: 3000

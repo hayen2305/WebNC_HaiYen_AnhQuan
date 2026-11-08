@@ -1,0 +1,15 @@
+$kind: http-request
+name: API-058 Sửa tiền cọc và đơn giá ngày của hợp đồng
+url: "{{baseUrl}}/contracts/{{c3}}"
+method: PUT
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"deposit": 50000, "daily_fee": 160000}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 5000

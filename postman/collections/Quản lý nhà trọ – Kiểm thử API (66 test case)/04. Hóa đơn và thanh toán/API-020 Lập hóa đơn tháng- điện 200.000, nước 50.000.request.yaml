@@ -1,0 +1,22 @@
+$kind: http-request
+name: "API-020 Lập hóa đơn tháng: điện 200.000, nước 50.000, phụ phí 10.000"
+url: "{{baseUrl}}/invoices"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"contract_id": "{{c1}}", "month": "{{month}}", "year": "{{year}}", "due_date": "{{today}}", "electricity": 200000, "water": 50000, "other_fee": 10000}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.test('Tổng 3.260.000, có mã QR', () => {
+        pm.expect(j.total_amount).to.eql(3260000);
+        pm.expect(j.qr_url).to.be.a('string');
+      });
+      pm.collectionVariables.set('i1', j.id);
+    language: text/javascript
+order: 1000

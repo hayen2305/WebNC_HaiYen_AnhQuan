@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/rooms"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"room_number": "B{{sfx}}", "floor": 1, "price": 3000000, "daily_price": 150000}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('rB', j.id);
+    language: text/javascript
+order: 6000

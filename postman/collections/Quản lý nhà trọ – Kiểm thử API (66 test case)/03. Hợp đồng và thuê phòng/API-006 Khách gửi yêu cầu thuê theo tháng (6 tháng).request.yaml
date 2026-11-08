@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts/request"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+body:
+  type: json
+  content: '{"room_id": "{{rA}}", "rental_type": "MONTHLY", "start_date": "{{today}}", "months": 6}'
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));
+      const j = pm.response.json();
+      pm.collectionVariables.set('c1', j.id);
+    language: text/javascript
+order: 1000

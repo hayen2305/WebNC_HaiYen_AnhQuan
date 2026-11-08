@@ -1,0 +1,15 @@
+$kind: http-request
+name: API-022 Lập hóa đơn cho kỳ ngoài thời hạn hợp đồng
+url: "{{baseUrl}}/invoices"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"contract_id": "{{c1}}", "month": 1, "year": "{{yearPlus5}}", "due_date": "{{today}}", "electricity": 1, "water": 1}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));
+    language: text/javascript
+order: 3000

@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/reports/revenue?from=2026-05-01&to=2026-01-01"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  from: 2026-05-01
+  to: 2026-01-01
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));
+    language: text/javascript
+order: 3000

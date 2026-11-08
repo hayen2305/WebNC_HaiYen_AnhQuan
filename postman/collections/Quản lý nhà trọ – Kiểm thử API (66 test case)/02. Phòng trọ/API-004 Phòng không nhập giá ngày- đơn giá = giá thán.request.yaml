@@ -1,0 +1,15 @@
+$kind: http-request
+name: "API-004 Phòng không nhập giá ngày: đơn giá = giá tháng / 30"
+url: "{{baseUrl}}/rooms"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      const r = j.find(x => x.id == pm.collectionVariables.get('rA'));
+      pm.test('Đơn giá ngày = 100000', () => pm.expect(r.daily_rate).to.eql(100000));
+    language: text/javascript
+order: 2000

@@ -1,0 +1,3332 @@
+{
+  "info": {
+    "name": "Quản lý nhà trọ – Kiểm thử API (66 test case)",
+    "_postman_id": "d5b1e868-8617-488f-9065-b3019427ca2c",
+    "description": "Chạy toàn bộ collection (Runner) trên DATABASE MỚI đã seed admin. Thứ tự các request quan trọng, không đảo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00. Chuẩn bị (không tính vào 66 test case)",
+      "item": [
+        {
+          "name": "Đăng nhập admin",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const sfx = Date.now() % 100000;",
+                  "pm.collectionVariables.set('sfx', sfx);",
+                  "const today = new Date(Date.now() + 7*3600e3).toISOString().slice(0,10);",
+                  "pm.collectionVariables.set('today', today);",
+                  "pm.collectionVariables.set('year', today.slice(0,4));",
+                  "pm.collectionVariables.set('yearPlus1', Number(today.slice(0,4)) + 1);",
+                  "pm.collectionVariables.set('yearPlus5', Number(today.slice(0,4)) + 5);",
+                  "pm.collectionVariables.set('month', Number(today.slice(5,7)));",
+                  "pm.collectionVariables.set('ym', today.slice(0,7));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('adm', j.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{adminEmail}}\", \"password\": \"{{adminPassword}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Ghi nhận doanh thu trước khi chạy (thực thu)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('basePaidCollected', j.summary.collected);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?basis=paid&from={{year}}-01-01&to={{today}}&group=day",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "basis",
+                  "value": "paid"
+                },
+                {
+                  "key": "from",
+                  "value": "{{year}}-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "{{today}}"
+                },
+                {
+                  "key": "group",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ghi nhận doanh thu trước khi chạy (kỳ phát sinh)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('basePeriodBilled', j.summary.billed);",
+                  "pm.collectionVariables.set('basePeriodCollected', j.summary.collected);",
+                  "pm.collectionVariables.set('basePeriodOutstanding', j.summary.outstanding);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?basis=period&from={{year}}-01-01&to={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "basis",
+                  "value": "period"
+                },
+                {
+                  "key": "from",
+                  "value": "{{year}}-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Đăng ký khách thứ hai",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('t2', j.token);",
+                  "pm.collectionVariables.set('t2id', j.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\": \"Khach 2\", \"email\": \"k2_{{sfx}}@x.com\", \"phone\": \"092{{sfx}}20\", \"password\": \"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tạo phòng A",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('rA', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_number\": \"A{{sfx}}\", \"floor\": 1, \"price\": 3000000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tạo phòng B",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('rB', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_number\": \"B{{sfx}}\", \"floor\": 1, \"price\": 3000000, \"daily_price\": 150000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tạo phòng C",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('rC', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_number\": \"C{{sfx}}\", \"floor\": 1, \"price\": 2000000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01. Đăng ký / Đăng nhập",
+      "item": [
+        {
+          "name": "API-001 Đăng ký khách thuê hợp lệ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Trả về token đăng nhập', () => pm.expect(j.token).to.be.a('string'));",
+                  "pm.test('Vai trò là TENANT', () => pm.expect(j.user.role).to.eql('TENANT'));",
+                  "pm.collectionVariables.set('t1', j.token);",
+                  "pm.collectionVariables.set('t1id', j.user.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\": \"Khach 1\", \"email\": \"k1_{{sfx}}@x.com\", \"phone\": \"091{{sfx}}10\", \"password\": \"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-002 Đăng ký với email sai định dạng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\": \"x\", \"email\": \"bad\", \"phone\": \"0911111111\", \"password\": \"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Phòng trọ",
+      "item": [
+        {
+          "name": "API-003 Khách xem danh sách phòng: chỉ thấy phòng trống",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('Tất cả phòng đều trống', () => pm.expect(j.every(r => r.status === 'EMPTY')).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-004 Phòng không nhập giá ngày: đơn giá = giá tháng / 30",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const r = j.find(x => x.id == pm.collectionVariables.get('rA'));",
+                  "pm.test('Đơn giá ngày = 100000', () => pm.expect(r.daily_rate).to.eql(100000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-005 Phòng có nhập giá ngày: dùng đúng giá đã nhập",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const r = j.find(x => x.id == pm.collectionVariables.get('rB'));",
+                  "pm.test('Đơn giá ngày = 150000', () => pm.expect(r.daily_rate).to.eql(150000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Hợp đồng và thuê phòng",
+      "item": [
+        {
+          "name": "API-006 Khách gửi yêu cầu thuê theo tháng (6 tháng)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('c1', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rA}}\", \"rental_type\": \"MONTHLY\", \"start_date\": \"{{today}}\", \"months\": 6}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-007 Gửi lại yêu cầu khi đang chờ duyệt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rA}}\", \"rental_type\": \"MONTHLY\", \"start_date\": \"{{today}}\", \"months\": 6}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-008 Khách thứ hai gửi yêu cầu thuê ngày (3 ngày) cho cùng phòng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('c2', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rA}}\", \"rental_type\": \"DAILY\", \"start_date\": \"{{today}}\", \"days\": 3}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-009 Yêu cầu có ngày bắt đầu trong quá khứ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rA}}\", \"rental_type\": \"DAILY\", \"start_date\": \"2020-01-01\", \"days\": 3}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-010 Khách xem yêu cầu của mình",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('1 yêu cầu chờ duyệt, 6 tháng', () => {",
+                  "  pm.expect(j.length).to.eql(1);",
+                  "  pm.expect(j[0].status).to.eql('PENDING');",
+                  "  pm.expect(j[0].months).to.eql(6);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "mine"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-011 Admin xem phòng có yêu cầu thuê",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Có 2 yêu cầu đang chờ', () => pm.expect(j.pending_requests).to.eql(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{rA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{rA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-012 Admin duyệt yêu cầu, tiền cọc 3.000.000",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c1}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c1}}",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"deposit\": 3000000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-013 Yêu cầu cạnh tranh tự động bị từ chối",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Yêu cầu thứ hai bị từ chối', () => pm.expect(j.some(c => c.id == pm.collectionVariables.get('c2'))).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts?status=REJECTED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "REJECTED"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-014 Phòng chuyển sang Đang thuê sau khi duyệt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Đang thuê, đúng khách, hết yêu cầu chờ', () => {",
+                  "  pm.expect(j.status).to.eql('RENTED');",
+                  "  pm.expect(j.tenant_name).to.eql('Khach 1');",
+                  "  pm.expect(j.pending_requests).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{rA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{rA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-015 Duyệt lại yêu cầu đã được xử lý",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c2}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c2}}",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-016 Khách xem hợp đồng đang hiệu lực",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('Đúng phòng đã thuê', () => pm.expect(j.room_id).to.eql(Number(pm.collectionVariables.get('rA'))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-017 Admin tạo trực tiếp hợp đồng thuê ngày (2 ngày)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('c3', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rB}}\", \"tenant_id\": \"{{t2id}}\", \"rental_type\": \"DAILY\", \"start_date\": \"{{today}}\", \"days\": 2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-018 Tạo hợp đồng cho phòng đã có người thuê",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rB}}\", \"tenant_id\": \"{{t1id}}\", \"rental_type\": \"DAILY\", \"start_date\": \"{{today}}\", \"days\": 2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-019 Tạm tính tiền hợp đồng thuê ngày",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('2 ngày × 150.000 = 300.000', () => {",
+                  "  pm.expect(j[0].estimated_total).to.eql(300000);",
+                  "  pm.expect(j[0].days).to.eql(2);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts?room_id={{rB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts"
+              ],
+              "query": [
+                {
+                  "key": "room_id",
+                  "value": "{{rB}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Hóa đơn và thanh toán",
+      "item": [
+        {
+          "name": "API-020 Lập hóa đơn tháng: điện 200.000, nước 50.000, phụ phí 10.000",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test('Tổng 3.260.000, có mã QR', () => {",
+                  "  pm.expect(j.total_amount).to.eql(3260000);",
+                  "  pm.expect(j.qr_url).to.be.a('string');",
+                  "});",
+                  "pm.collectionVariables.set('i1', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contract_id\": \"{{c1}}\", \"month\": \"{{month}}\", \"year\": \"{{year}}\", \"due_date\": \"{{today}}\", \"electricity\": 200000, \"water\": 50000, \"other_fee\": 10000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-021 Lập hóa đơn trùng kỳ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contract_id\": \"{{c1}}\", \"month\": \"{{month}}\", \"year\": \"{{year}}\", \"due_date\": \"{{today}}\", \"electricity\": 1, \"water\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-022 Lập hóa đơn cho kỳ ngoài thời hạn hợp đồng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contract_id\": \"{{c1}}\", \"month\": 1, \"year\": \"{{yearPlus5}}\", \"due_date\": \"{{today}}\", \"electricity\": 1, \"water\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-023 Lập hóa đơn cho hợp đồng thuê ngày",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('i3', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"contract_id\": \"{{c3}}\", \"month\": \"{{month}}\", \"year\": \"{{year}}\", \"due_date\": \"{{today}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-024 Tổng tiền hóa đơn hợp đồng thuê ngày = 300.000",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const i = j.find(x => x.id == pm.collectionVariables.get('i3'));",
+                  "pm.test('2 ngày × 150.000', () => pm.expect(Number(i.total_amount)).to.eql(300000));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "admin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-025 Khách xem hóa đơn của mình",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('1 hóa đơn, có QR, đúng tiền điện', () => {",
+                  "  pm.expect(j.length).to.eql(1);",
+                  "  pm.expect(j[0].qr_url).to.be.a('string');",
+                  "  pm.expect(j[0].electricity).to.eql(200000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/tenant",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "tenant"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-026 Lọc theo khoảng tháng có chứa kỳ hóa đơn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Có 1 hóa đơn', () => pm.expect(j.length).to.eql(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/tenant?from={{ym}}&to={{ym}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "tenant"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{ym}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{ym}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-027 Lọc theo khoảng tháng không chứa kỳ hóa đơn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Không có hóa đơn', () => pm.expect(j.length).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/tenant?from={{yearPlus1}}-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "tenant"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{yearPlus1}}-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-028 Lọc với tháng sai định dạng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/tenant?from=abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "tenant"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "abc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-029 Admin xác nhận thanh toán bằng chuyển khoản",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/{{i1}}/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "{{i1}}",
+                "pay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"payment_method\": \"BANK_TRANSFER\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-030 Xác nhận thanh toán lần hai",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/{{i1}}/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "{{i1}}",
+                "pay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-031 Hóa đơn đã thanh toán có ngày thanh toán và phương thức",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const i = j.find(x => x.id == pm.collectionVariables.get('i1'));",
+                  "pm.test('PAID, có paid_at, BANK_TRANSFER', () => {",
+                  "  pm.expect(i.payment_status).to.eql('PAID');",
+                  "  pm.expect(i.paid_at).to.be.a('string');",
+                  "  pm.expect(i.payment_method).to.eql('BANK_TRANSFER');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "admin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-032 Admin đặt hóa đơn về Chưa thanh toán",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/{{i1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "{{i1}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"payment_status\": \"UNPAID\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-033 Ngày thanh toán bị xóa sau khi đặt về chưa thanh toán",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const i = j.find(x => x.id == pm.collectionVariables.get('i1'));",
+                  "pm.test('paid_at = null', () => pm.expect(i.paid_at).to.be.null);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "admin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-034 Sửa tiền nước và đặt Đã thanh toán trong một lần",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/{{i1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "{{i1}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"payment_status\": \"PAID\", \"water\": 70000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-035 Khách xuất hóa đơn của mình ra Excel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Đúng định dạng Excel', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('spreadsheetml'));",
+                  "const b = pm.response.stream;",
+                  "const a = b.data || b;",
+                  "pm.test('Tệp .xlsx hợp lệ (bắt đầu bằng PK)', () => {",
+                  "  pm.expect(a[0]).to.eql(0x50);",
+                  "  pm.expect(a[1]).to.eql(0x4B);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/tenant/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "tenant",
+                "export"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-036 Admin gọi chức năng xuất hóa đơn của khách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/tenant/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "invoices",
+                "tenant",
+                "export"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Báo cáo doanh thu",
+      "item": [
+        {
+          "name": "API-037 Doanh thu theo ngày thực thu, gom theo ngày",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "const v = k => Number(pm.collectionVariables.get(k));",
+                  "pm.test('Thực thu tăng đúng 3.280.000 so với trước khi chạy', () => pm.expect(j.summary.collected - v('basePaidCollected')).to.eql(3280000));",
+                  "pm.test('Có dòng theo ngày', () => pm.expect(j.series.length).to.be.at.least(1));",
+                  "pm.test('Có phòng vừa tạo trong báo cáo theo phòng', () => pm.expect(j.by_room.some(r => r.room_number === 'A' + pm.collectionVariables.get('sfx'))).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?basis=paid&from={{year}}-01-01&to={{today}}&group=day",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "basis",
+                  "value": "paid"
+                },
+                {
+                  "key": "from",
+                  "value": "{{year}}-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "{{today}}"
+                },
+                {
+                  "key": "group",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-038 Doanh thu theo kỳ phát sinh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "const v = k => Number(pm.collectionVariables.get(k));",
+                  "pm.test('Phát sinh tăng 3.580.000; đã thu tăng 3.280.000; chưa thu tăng 300.000', () => {",
+                  "  pm.expect(j.summary.billed - v('basePeriodBilled')).to.eql(3580000);",
+                  "  pm.expect(j.summary.collected - v('basePeriodCollected')).to.eql(3280000);",
+                  "  pm.expect(j.summary.outstanding - v('basePeriodOutstanding')).to.eql(300000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?basis=period&from={{year}}-01-01&to={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "basis",
+                  "value": "period"
+                },
+                {
+                  "key": "from",
+                  "value": "{{year}}-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-039 Khoảng ngày bị đảo ngược",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?from=2026-05-01&to=2026-01-01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-01-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-040 Khách thuê gọi báo cáo doanh thu",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-041 Admin xuất báo cáo doanh thu ra Excel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.stream;",
+                  "const a = b.data || b;",
+                  "pm.test('Tệp .xlsx hợp lệ (bắt đầu bằng PK)', () => {",
+                  "  pm.expect(a[0]).to.eql(0x50);",
+                  "  pm.expect(a[1]).to.eql(0x4B);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue/export?basis=paid&from={{year}}-01-01&to={{today}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "revenue",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "basis",
+                  "value": "paid"
+                },
+                {
+                  "key": "from",
+                  "value": "{{year}}-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "{{today}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Sự cố",
+      "item": [
+        {
+          "name": "API-042 Khách báo sự cố cho phòng mình không thuê",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rB}}\", \"title\": \"x\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-043 Khách báo sự cố cho phòng đang thuê (mức cao)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('tk', j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"room_id\": \"{{rA}}\", \"title\": \"Hong voi\", \"severity\": \"HIGH\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-044 Khách xem sự cố đã báo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('1 sự cố, có số phòng', () => {",
+                  "  pm.expect(j.length).to.eql(1);",
+                  "  pm.expect(j[0].room_number).to.match(/^A/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "my"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-045 Admin chuyển sự cố sang Đã xử lý kèm ghi chú",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/{{tk}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                "{{tk}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"RESOLVED\", \"admin_note\": \"Da sua\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-046 Sự cố đã xử lý có ghi chú và thời điểm xử lý xong",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Có admin_note và resolved_at', () => {",
+                  "  pm.expect(j[0].admin_note).to.eql('Da sua');",
+                  "  pm.expect(j[0].resolved_at).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets?status=RESOLVED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "RESOLVED"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Hồ sơ cá nhân",
+      "item": [
+        {
+          "name": "API-047 Khách cập nhật họ tên và số điện thoại",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('Tên mới được lưu', () => pm.expect(j.user.full_name).to.eql('Khach Mot'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"full_name\": \"Khach Mot\", \"phone\": \"098{{sfx}}11\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-048 Đổi email sang email đã có người dùng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"admin@local.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-049 Tên mới hiển thị ở hợp đồng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('tenant_name = Khach Mot', () => pm.expect(j[0].tenant_name).to.eql('Khach Mot'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t1}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "mine"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Khóa tài khoản",
+      "item": [
+        {
+          "name": "API-050 Admin khóa tài khoản khách",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{t2id}}/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{t2id}}",
+                "active"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_active\": false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-051 Dùng token của tài khoản đã bị khóa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-052 Đăng nhập bằng tài khoản đã bị khóa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"k2_{{sfx}}@x.com\", \"password\": \"123456\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-053 Admin mở khóa: tài khoản dùng lại được",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));",
+                  "pm.sendRequest({",
+                  "  url: pm.collectionVariables.get('baseUrl') + '/rooms',",
+                  "  method: 'GET',",
+                  "  header: { Authorization: 'Bearer ' + pm.collectionVariables.get('t2') }",
+                  "}, (err, res) => {",
+                  "  pm.test('Khách vừa được mở khóa gọi API được (200)', () => pm.expect(res.code).to.eql(200));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{t2id}}/active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{t2id}}",
+                "active"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"is_active\": true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Ràng buộc xóa dữ liệu",
+      "item": [
+        {
+          "name": "API-054 Xóa người dùng đang có hợp đồng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{t1id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{t1id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-055 Xóa hợp đồng đã có hóa đơn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c1}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c1}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-056 Thanh lý hợp đồng đang hiệu lực",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c1}}/terminate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c1}}",
+                "terminate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-057 Phòng trống sau khi thanh lý",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Phòng trống, không còn hợp đồng hiện hành', () => {",
+                  "  pm.expect(j.status).to.eql('EMPTY');",
+                  "  pm.expect(j.current_contract_id).to.not.be.ok;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{rA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{rA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-058 Sửa tiền cọc và đơn giá ngày của hợp đồng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c3}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"deposit\": 50000, \"daily_fee\": 160000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "API-059 Xóa hợp đồng thuê ngày khi còn hóa đơn",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-060 Xóa hóa đơn rồi xóa hợp đồng",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.sendRequest({",
+                  "  url: pm.collectionVariables.get('baseUrl') + '/invoices/' + pm.collectionVariables.get('i3'),",
+                  "  method: 'DELETE',",
+                  "  header: { Authorization: 'Bearer ' + pm.collectionVariables.get('adm') }",
+                  "}, () => {});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c3}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c3}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-061 Phòng trở về trạng thái trống sau khi xóa hợp đồng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('Phòng trống', () => pm.expect(j.status).to.eql('EMPTY'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{rB}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{rB}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-062 Xóa phòng đã từng có hợp đồng",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{rA}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{rA}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-063 Xóa phòng trống chưa có lịch sử",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/rooms/{{rC}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rooms",
+                "{{rC}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-064 Khách hủy yêu cầu thuê đang chờ duyệt",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.sendRequest({",
+                  "  url: pm.collectionVariables.get('baseUrl') + '/contracts/request',",
+                  "  method: 'POST',",
+                  "  header: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + pm.collectionVariables.get('t2') },",
+                  "  body: { mode: 'raw', raw: JSON.stringify({ room_id: Number(pm.collectionVariables.get('rB')), rental_type: 'MONTHLY', start_date: pm.collectionVariables.get('today'), months: 1 }) }",
+                  "}, (err, res) => { pm.collectionVariables.set('c4', res.json().id); });"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c4}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c4}}",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-065 Hủy lại yêu cầu đã hủy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{t2}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/contracts/{{c4}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contracts",
+                "{{c4}}",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "API-066 Xóa người dùng chỉ còn hợp đồng đã hủy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adm}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{t2id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{t2id}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@local.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin@123"
+    }
+  ]
+}

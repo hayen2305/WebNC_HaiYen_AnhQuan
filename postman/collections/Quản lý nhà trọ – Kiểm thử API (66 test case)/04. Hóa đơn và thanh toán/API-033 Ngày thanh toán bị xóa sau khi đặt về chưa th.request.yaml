@@ -1,0 +1,15 @@
+$kind: http-request
+name: API-033 Ngày thanh toán bị xóa sau khi đặt về chưa thanh toán
+url: "{{baseUrl}}/invoices/admin"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      const i = j.find(x => x.id == pm.collectionVariables.get('i1'));
+      pm.test('paid_at = null', () => pm.expect(i.paid_at).to.be.null);
+    language: text/javascript
+order: 14000

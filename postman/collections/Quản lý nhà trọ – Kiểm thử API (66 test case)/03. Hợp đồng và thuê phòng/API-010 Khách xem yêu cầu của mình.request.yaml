@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts/mine"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('1 yêu cầu chờ duyệt, 6 tháng', () => {
+        pm.expect(j.length).to.eql(1);
+        pm.expect(j[0].status).to.eql('PENDING');
+        pm.expect(j[0].months).to.eql(6);
+      });
+    language: text/javascript
+order: 5000

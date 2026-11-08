@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { nowInAppTz } from '../common/date.util';
 import { BankWebhookDto } from './dto/invoice.dto';
 import { InvoiceRepository } from './invoice.repository';
 
@@ -37,21 +38,37 @@ export class PaymentService {
   }
 
   /** Tìm hóa đơn UNPAID khớp nội dung chuyển khoản, đối chiếu số tiền rồi đánh dấu PAID. */
-  async processBankWebhook({ content, amount }: BankWebhookDto) {
+  async processBankWebhook({ content, amount, transaction_ref }: BankWebhookDto) {
     if (!content) throw new BadRequestException('Thiếu nội dung chuyển khoản.');
 
     const unpaidInvoices = await this.invoiceRepository.findAllUnpaid();
     const normalizedContent = content.replace(/\s+/g, '').toUpperCase();
 
-    const matched = unpaidInvoices.find((inv) =>
-      normalizedContent.includes(this.buildTransferContent(inv.room_number, inv.id)),
-    );
+    // Mã hóa đơn phải khớp trọn vẹn: "SEV1011" (phòng 101, HĐ 1) không được khớp nhầm "SEV10112" (phòng 101, HĐ 12).
+    const matched = unpaidInvoices.find((inv) => {
+      const code = this.buildTransferContent(inv.room_number, inv.id);
+      let from = normalizedContent.indexOf(code);
+      while (from !== -1) {
+        if (!/\d/.test(normalizedContent[from + code.length] ?? '')) return true;
+        from = normalizedContent.indexOf(code, from + 1);
+      }
+      return false;
+    });
     if (!matched) throw new NotFoundException('Không khớp được hóa đơn nào với nội dung chuyển khoản.');
     if (amount != null && Number(amount) < Number(matched.total_amount)) {
       throw new ConflictException('Số tiền chuyển khoản nhỏ hơn số tiền hóa đơn, cần đối soát thủ công.');
     }
 
-    await this.invoiceRepository.markPaid(matched.id);
+    try {
+      const affected = await this.invoiceRepository.markPaid(matched.id, {
+        paidAt: nowInAppTz(), method: 'BANK_TRANSFER',
+        transactionRef: transaction_ref ? String(transaction_ref).slice(0, 100) : null,
+      });
+      if (!affected) throw new ConflictException('Hóa đơn đã được thanh toán trước đó.');
+    } catch (e: any) {
+      if (e && e.code === 'ER_DUP_ENTRY') throw new ConflictException('Giao dịch này đã được ghi nhận trước đó.');
+      throw e;
+    }
     return matched;
   }
 }

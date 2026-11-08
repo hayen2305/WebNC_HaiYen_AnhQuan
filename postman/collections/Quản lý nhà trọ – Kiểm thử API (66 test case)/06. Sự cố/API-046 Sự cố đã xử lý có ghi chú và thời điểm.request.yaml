@@ -1,0 +1,19 @@
+$kind: http-request
+name: API-046 Sự cố đã xử lý có ghi chú và thời điểm xử lý xong
+url: "{{baseUrl}}/tickets?status=RESOLVED"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  status: RESOLVED
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Có admin_note và resolved_at', () => {
+        pm.expect(j[0].admin_note).to.eql('Da sua');
+        pm.expect(j[0].resolved_at).to.be.a('string');
+      });
+    language: text/javascript
+order: 5000

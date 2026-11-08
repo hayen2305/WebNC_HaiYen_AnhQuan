@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/rooms/{{rA}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Phòng trống, không còn hợp đồng hiện hành', () => {
+        pm.expect(j.status).to.eql('EMPTY');
+        pm.expect(j.current_contract_id).to.not.be.ok;
+      });
+    language: text/javascript
+order: 4000

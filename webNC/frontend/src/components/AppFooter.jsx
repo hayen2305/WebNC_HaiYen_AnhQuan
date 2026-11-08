@@ -2,6 +2,7 @@ import { Layout, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/AppFooter.css';
+import { lazy } from 'react';
 
 const { Footer } = Layout;
 const { Text, Title } = Typography;
@@ -15,6 +16,7 @@ export default function AppFooter() {
         title: 'QUẢN LÝ',
         links: [
           { label: 'Phòng trọ', to: '/admin/rooms' },
+          { label: 'Hợp đồng', to: '/admin/contracts' },
           { label: 'Hóa đơn', to: '/admin/invoices' },
           { label: 'Sự cố', to: '/admin/tickets' },
         ],
@@ -28,6 +30,7 @@ export default function AppFooter() {
       {
         title: 'DỊCH VỤ',
         links: [
+          { label: 'Thuê phòng', to: '/tenant/rooms' },
           { label: 'Hóa đơn của tôi', to: '/tenant' },
           { label: 'Báo sự cố', to: '/tenant/tickets' },
         ],

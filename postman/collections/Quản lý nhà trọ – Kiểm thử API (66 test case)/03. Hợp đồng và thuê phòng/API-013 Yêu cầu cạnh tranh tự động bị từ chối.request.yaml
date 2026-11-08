@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts?status=REJECTED"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  status: REJECTED
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Yêu cầu thứ hai bị từ chối', () => pm.expect(j.some(c => c.id == pm.collectionVariables.get('c2'))).to.be.true);
+    language: text/javascript
+order: 8000

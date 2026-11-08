@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/contracts?room_id={{rB}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+queryParams:
+  room_id: "{{rB}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('2 ngày × 150.000 = 300.000', () => {
+        pm.expect(j[0].estimated_total).to.eql(300000);
+        pm.expect(j[0].days).to.eql(2);
+      });
+    language: text/javascript
+order: 14000

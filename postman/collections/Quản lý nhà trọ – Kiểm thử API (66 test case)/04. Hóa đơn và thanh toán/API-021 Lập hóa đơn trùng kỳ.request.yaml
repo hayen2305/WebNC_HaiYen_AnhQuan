@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+body:
+  type: json
+  content: '{"contract_id": "{{c1}}", "month": "{{month}}", "year": "{{year}}", "due_date": "{{today}}", "electricity": 1, "water": 1}'
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 409', () => pm.response.to.have.status(409));
+    language: text/javascript
+order: 2000

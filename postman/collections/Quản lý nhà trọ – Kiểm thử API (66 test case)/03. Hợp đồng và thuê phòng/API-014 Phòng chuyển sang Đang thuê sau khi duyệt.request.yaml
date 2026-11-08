@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/rooms/{{rA}}"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Đang thuê, đúng khách, hết yêu cầu chờ', () => {
+        pm.expect(j.status).to.eql('RENTED');
+        pm.expect(j.tenant_name).to.eql('Khach 1');
+        pm.expect(j.pending_requests).to.eql(0);
+      });
+    language: text/javascript
+order: 9000

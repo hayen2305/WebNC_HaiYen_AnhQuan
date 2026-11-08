@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices/tenant"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('1 hóa đơn, có QR, đúng tiền điện', () => {
+        pm.expect(j.length).to.eql(1);
+        pm.expect(j[0].qr_url).to.be.a('string');
+        pm.expect(j[0].electricity).to.eql(200000);
+      });
+    language: text/javascript
+order: 6000

@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/users/{{t2id}}"
+method: DELETE
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{adm}}
+scripts:
+  - type: afterResponse
+    code: pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 13000

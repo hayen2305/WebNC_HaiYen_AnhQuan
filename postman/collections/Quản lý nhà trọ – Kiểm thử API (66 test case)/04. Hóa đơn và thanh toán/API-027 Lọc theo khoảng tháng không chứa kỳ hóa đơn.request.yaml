@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/invoices/tenant?from={{yearPlus1}}-01"
+method: GET
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{t1}}
+queryParams:
+  from: "{{yearPlus1}}-01"
+scripts:
+  - type: afterResponse
+    code: |-
+      const j = pm.response.json();
+      pm.test('Không có hóa đơn', () => pm.expect(j.length).to.eql(0));
+    language: text/javascript
+order: 8000

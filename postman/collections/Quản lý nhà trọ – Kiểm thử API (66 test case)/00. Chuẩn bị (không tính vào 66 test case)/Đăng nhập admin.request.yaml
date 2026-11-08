@@ -1,0 +1,28 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: '{"email": "{{adminEmail}}", "password": "{{adminPassword}}"}'
+scripts:
+  - type: beforeRequest
+    code: |-
+      const sfx = Date.now() % 100000;
+      pm.collectionVariables.set('sfx', sfx);
+      const today = new Date(Date.now() + 7*3600e3).toISOString().slice(0,10);
+      pm.collectionVariables.set('today', today);
+      pm.collectionVariables.set('year', today.slice(0,4));
+      pm.collectionVariables.set('yearPlus1', Number(today.slice(0,4)) + 1);
+      pm.collectionVariables.set('yearPlus5', Number(today.slice(0,4)) + 5);
+      pm.collectionVariables.set('month', Number(today.slice(5,7)));
+      pm.collectionVariables.set('ym', today.slice(0,7));
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Mã trạng thái 200', () => pm.response.to.have.status(200));
+      const j = pm.response.json();
+      pm.collectionVariables.set('adm', j.token);
+    language: text/javascript
+order: 1000

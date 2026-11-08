@@ -11,5 +11,6 @@ import { ReminderService } from './reminder.service';
   imports: [ContractsModule, RoomsModule],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoiceRepository, PaymentService, ReminderService],
+  exports: [InvoicesService],
 })
 export class InvoicesModule {}
